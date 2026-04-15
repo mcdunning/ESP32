@@ -22,6 +22,46 @@ ESP32 firmware that controls a garage door opener via a relay, monitors door pos
 | LED — Green | 22 | LEDC PWM channel 1 |
 | LED — Blue | 23 | LEDC PWM channel 2 |
 
+### Wiring Diagram
+
+```
+                        ┌───────────────────────┐
+                        │         ESP32         │
+                        │                       │
+               GPIO  8 ─┤                       │
+               GPIO  6 ─┤                       │
+               GPIO  7 ─┤                       │
+               GPIO 21 ─┤                       ├─ 3V3
+               GPIO 22 ─┤                       │
+               GPIO 23 ─┤                       ├─ GND ──────────────────────┐
+                        └───────────────────────┘                            │
+                                                                             │
+  ┌── Door Trigger ──────────────────────────────────────────────────────┐   │
+  │                                                                      │   │
+  │                          PN2222                                      │   │
+  │  GPIO 8 ──┤1 kΩ├──────── Base     ◄── trigger pulse                 │   │
+  │                          Emitter ─────────────────────────────────── ┼───┤
+  │                          Collector ──┐                               │   │
+  │                                     ├── Opener wall button terminals │   │
+  │                          GND ───────┘  (shorts them like a button)  │   │
+  └──────────────────────────────────────────────────────────────────────┘   │
+                                                                             │
+  ┌── Position Sensors ──────────────────────────────────────────────────┐   │
+  │                                                                      │   │
+  │  GPIO 6 ──────────────── [Mag Switch — CLOSED] ─────────────────────┼───┤
+  │  GPIO 7 ──────────────── [Mag Switch — OPEN  ] ─────────────────────┼───┤
+  │                           (active-LOW, internal pull-up enabled)     │   │
+  └──────────────────────────────────────────────────────────────────────┘   │
+                                                                             │
+  ┌── RGB LED (common cathode) ──────────────────────────────────────────┐   │
+  │                                                                      │   │
+  │  GPIO 21 ──┤100 Ω├──── Red   anode ──┐                              │   │
+  │  GPIO 22 ──┤100 Ω├──── Green anode ──┤ Common cathode ──────────────┼───┘
+  │  GPIO 23 ──┤100 Ω├──── Blue  anode ──┘                              │
+  │                                                                      │
+  └──────────────────────────────────────────────────────────────────────┘
+```
+
 ### Wiring Notes
 
 - The PN2222 collector/emitter is triggered by a 500 ms pulse on GPIO 8 — wire the collector/emitter in parallel with the existing wall button terminals
