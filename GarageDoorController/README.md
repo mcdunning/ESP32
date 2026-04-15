@@ -7,7 +7,7 @@ ESP32 firmware that controls a garage door opener via a relay, monitors door pos
 ### Components
 
 - ESP32 development board
-- NPN transistor or relay module (relay trigger input)
+- PN2222 NPN transistor (door trigger)
 - 2× magnetic switches (open and closed position sensors)
 - Common-cathode RGB LED + current-limiting resistors
 
@@ -15,7 +15,7 @@ ESP32 firmware that controls a garage door opener via a relay, monitors door pos
 
 | Signal | GPIO | Notes |
 |---|---|---|
-| Relay trigger | 8 | Output, active-HIGH pulse |
+| PN2222 base | 8 | Output, active-HIGH pulse |
 | Open sensor | 7 | Input, active-LOW (mag switch to GND) |
 | Closed sensor | 6 | Input, active-LOW (mag switch to GND) |
 | LED — Red | 21 | LEDC PWM channel 0 |
@@ -24,7 +24,7 @@ ESP32 firmware that controls a garage door opener via a relay, monitors door pos
 
 ### Wiring Notes
 
-- The relay/transistor is triggered by a 500 ms pulse on GPIO 8 — wire this in parallel with the existing wall button
+- The PN2222 collector/emitter is triggered by a 500 ms pulse on GPIO 8 — wire the collector/emitter in parallel with the existing wall button terminals
 - Magnetic switches are wired between the sensor GPIO and GND; internal pull-ups are enabled in firmware
 - RGB LED common pin connects to GND; each colour pin connects through a resistor (~100 Ω) to its GPIO
 
