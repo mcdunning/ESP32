@@ -1,0 +1,5 @@
+{
+    "idf.espIdfPathWin": "C:/esp/v6.0/esp-idf",
+    "idf.toolsPathWin": "C:/Espressif",
+    "idf.pythonBinPathWin": "C:/Espressif/tools/python/v6.0/venv/Scripts/python.exe"
+}

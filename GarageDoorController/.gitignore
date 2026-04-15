@@ -1,0 +1,12 @@
+# ESP-IDF build output
+build/
+
+# Component manager downloads (reproducible via idf_component.yml)
+managed_components/
+
+# Backup created when sdkconfig is modified
+sdkconfig.old
+
+# Sensitive configuration (WiFi credentials, MQTT broker/auth)
+# Copy config.h.example to config.h and fill in your values
+main/config.h

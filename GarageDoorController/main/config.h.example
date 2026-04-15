@@ -1,0 +1,36 @@
+#pragma once
+
+#include "driver/gpio.h"
+
+/* ── WiFi ──────────────────────────────────────────────────────────────── */
+#define WIFI_SSID               "YOUR_WIFI_SSID"
+#define WIFI_PASSWORD           "YOUR_WIFI_PASSWORD"
+
+/* ── MQTT ──────────────────────────────────────────────────────────────── */
+#define MQTT_BROKER_URI         "mqtt://192.168.1.100"
+#define MQTT_CLIENT_ID          "esp32_garage"
+#define MQTT_USERNAME           ""      /* leave empty if broker is open */
+#define MQTT_PASSWORD           ""
+
+/* Publish topics */
+#define MQTT_TOPIC_STATE        "garage/door/state"
+#define MQTT_TOPIC_AVAIL        "garage/door/availability"
+
+/* Subscribe topic — accepted payloads: OPEN | CLOSE | TOGGLE */
+#define MQTT_TOPIC_CMD          "garage/door/command"
+
+/* ── Hardware ──────────────────────────────────────────────────────────── */
+#define DOOR_RELAY_PIN          GPIO_NUM_8   /* NPN/relay control output          */
+#define DOOR_OPEN_SENSOR_PIN    GPIO_NUM_7   /* Mag switch, active-LOW when open   */
+#define DOOR_CLOSED_SENSOR_PIN  GPIO_NUM_6   /* Mag switch, active-LOW when closed */
+
+/* ── RGB LED (common cathode) ──────────────────────────────────────────── */
+#define LED_RED_PIN             GPIO_NUM_21
+#define LED_GREEN_PIN           GPIO_NUM_22
+#define LED_BLUE_PIN            GPIO_NUM_23
+#define LED_BLINK_PERIOD_MS     500          /* On/off interval for transitions   */
+
+/* ── Timing ────────────────────────────────────────────────────────────── */
+#define RELAY_PULSE_MS          500          /* How long the relay contact closes  */
+#define DOOR_TRAVEL_TIMEOUT_MS  20000        /* Max expected open/close travel     */
+#define SENSOR_POLL_MS          100          /* Door task loop period              */
