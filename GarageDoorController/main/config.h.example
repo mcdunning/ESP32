@@ -32,5 +32,5 @@
 
 /* ── Timing ────────────────────────────────────────────────────────────── */
 #define RELAY_PULSE_MS          500          /* How long the relay contact closes  */
-#define DOOR_TRAVEL_TIMEOUT_MS  20000        /* Max expected open/close travel     */
+#define DOOR_TRAVEL_TIMEOUT_MS  10000        /* Max expected open/close travel     */
 #define SENSOR_POLL_MS          100          /* Door task loop period              */

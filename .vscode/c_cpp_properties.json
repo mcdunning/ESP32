@@ -76,6 +76,7 @@
                 "C:/esp/v6.0/esp-idf/components/lwip/port/esp32xx/include/arch",
                 "C:/esp/v6.0/esp-idf/components/lwip/port/esp32xx/include/sys",
                 "C:/esp/v6.0/esp-idf/components/esp_driver_gpio/include",
+                "C:/esp/v6.0/esp-idf/components/esp_driver_ledc/include",
                 "C:/esp/v6.0/esp-idf/components/nvs_flash/include",
                 "C:/esp/v6.0/esp-idf/components/esp_partition/include",
                 "C:/esp/v6.0/esp-idf/components/esp_blockdev/include",

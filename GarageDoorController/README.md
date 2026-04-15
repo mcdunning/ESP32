@@ -76,6 +76,8 @@ ESP32 firmware that controls a garage door opener via a relay, monitors door pos
 | Open | Green | Solid |
 | Closing | Red | Blinking |
 | Opening | Green | Blinking |
+| Stopped Closing | Amber | Solid |
+| Stopped Opening | Amber | Solid |
 | Unknown | Amber | Blinking |
 
 ## MQTT

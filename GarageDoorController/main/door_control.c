@@ -18,28 +18,55 @@ QueueHandle_t g_door_cmd_queue;
 const char *door_state_to_str(door_state_t state)
 {
     switch (state) {
-        case DOOR_STATE_OPEN:    return "open";
-        case DOOR_STATE_CLOSED:  return "closed";
-        case DOOR_STATE_OPENING: return "opening";
-        case DOOR_STATE_CLOSING: return "closing";
-        default:                 return "unknown";
+        case DOOR_STATE_OPEN:            return "open";
+        case DOOR_STATE_CLOSED:          return "closed";
+        case DOOR_STATE_OPENING:         return "opening";
+        case DOOR_STATE_CLOSING:         return "closing";
+        case DOOR_STATE_STOPPED_OPENING: return "stopped_opening";
+        case DOOR_STATE_STOPPED_CLOSING: return "stopped_closing";
+        default:                         return "unknown";
+    }
+}
+
+/**
+ * @brief Returns the state the door transitions to when the relay is triggered.
+ *
+ * Garage door cycle:
+ *   CLOSED          → OPENING
+ *   OPENING         → STOPPED_OPENING
+ *   STOPPED_OPENING → CLOSING
+ *   CLOSING         → STOPPED_CLOSING
+ *   STOPPED_CLOSING → OPENING
+ *   OPEN            → CLOSING
+ *   UNKNOWN         → UNKNOWN  (pulse fires but we wait for a sensor to confirm)
+ */
+static door_state_t next_state_after_trigger(door_state_t current)
+{
+    switch (current) {
+        case DOOR_STATE_CLOSED:          return DOOR_STATE_OPENING;
+        case DOOR_STATE_OPENING:         return DOOR_STATE_STOPPED_OPENING;
+        case DOOR_STATE_STOPPED_OPENING: return DOOR_STATE_CLOSING;
+        case DOOR_STATE_CLOSING:         return DOOR_STATE_STOPPED_CLOSING;
+        case DOOR_STATE_STOPPED_CLOSING: return DOOR_STATE_OPENING;
+        case DOOR_STATE_OPEN:            return DOOR_STATE_CLOSING;
+        default:                         return DOOR_STATE_UNKNOWN;
     }
 }
 
 static void gpio_init(void)
 {
-    /* Relay output — default LOW so the transistor is off at boot */
-    gpio_config_t relay_cfg = {
+    /* Transistor base — default LOW so it is off at boot */
+    gpio_config_t trig_cfg = {
         .pin_bit_mask = (1ULL << DOOR_RELAY_PIN),
         .mode         = GPIO_MODE_OUTPUT,
         .pull_up_en   = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_ENABLE,
         .intr_type    = GPIO_INTR_DISABLE,
     };
-    ESP_ERROR_CHECK(gpio_config(&relay_cfg));
+    ESP_ERROR_CHECK(gpio_config(&trig_cfg));
     gpio_set_level(DOOR_RELAY_PIN, 0);
 
-    /* Reed switch inputs — active LOW with internal pull-ups */
+    /* Magnetic switch inputs — active LOW with internal pull-ups */
     gpio_config_t sensor_cfg = {
         .pin_bit_mask = (1ULL << DOOR_OPEN_SENSOR_PIN) |
                         (1ULL << DOOR_CLOSED_SENSOR_PIN),
@@ -53,18 +80,16 @@ static void gpio_init(void)
 
 static void relay_pulse(void)
 {
-    ESP_LOGI(TAG, "Relay pulse — start");
+    ESP_LOGI(TAG, "Trigger pulse — start");
     gpio_set_level(DOOR_RELAY_PIN, 1);
     vTaskDelay(pdMS_TO_TICKS(RELAY_PULSE_MS));
     gpio_set_level(DOOR_RELAY_PIN, 0);
-    ESP_LOGI(TAG, "Relay pulse — end");
+    ESP_LOGI(TAG, "Trigger pulse — end");
 }
 
-/** @brief Read hardware sensors and return the physical door position.
- *         Returns UNKNOWN when neither sensor is active (door in motion). */
+/** @brief Read magnetic switches. Returns OPEN, CLOSED, or UNKNOWN. */
 static door_state_t sensors_read(void)
 {
-    /* Sensors are active-LOW */
     if (gpio_get_level(DOOR_CLOSED_SENSOR_PIN) == 0) return DOOR_STATE_CLOSED;
     if (gpio_get_level(DOOR_OPEN_SENSOR_PIN)   == 0) return DOOR_STATE_OPEN;
     return DOOR_STATE_UNKNOWN;
@@ -79,9 +104,9 @@ void door_control_task(void *pvParameters)
     g_door_cmd_queue = xQueueCreate(4, sizeof(door_command_t));
     configASSERT(g_door_cmd_queue != NULL);
 
-    door_state_t  state          = sensors_read();
-    door_state_t  last_published = (door_state_t)-1; /* force first publish */
-    TickType_t    transition_tick = 0;
+    door_state_t state          = sensors_read();
+    door_state_t last_published = (door_state_t)-1; /* force first publish */
+    TickType_t   transition_tick = 0;
 
     ESP_LOGI(TAG, "Ready — initial state: %s", door_state_to_str(state));
 
@@ -93,34 +118,42 @@ void door_control_task(void *pvParameters)
 
             switch (cmd) {
                 case DOOR_CMD_OPEN:
-                    if (state != DOOR_STATE_OPEN && state != DOOR_STATE_OPENING) {
-                        state   = DOOR_STATE_OPENING;
+                    /* Only trigger when the next state will be OPENING */
+                    if (state == DOOR_STATE_CLOSED ||
+                        state == DOOR_STATE_STOPPED_CLOSING) {
                         trigger = true;
                     }
                     break;
 
                 case DOOR_CMD_CLOSE:
-                    if (state != DOOR_STATE_CLOSED && state != DOOR_STATE_CLOSING) {
-                        state   = DOOR_STATE_CLOSING;
+                    /* Only trigger when the next state will be CLOSING */
+                    if (state == DOOR_STATE_OPEN ||
+                        state == DOOR_STATE_STOPPED_OPENING) {
                         trigger = true;
                     }
                     break;
 
                 case DOOR_CMD_TOGGLE:
-                    /* Infer direction from current state */
-                    state   = (state == DOOR_STATE_CLOSED || state == DOOR_STATE_CLOSING)
-                              ? DOOR_STATE_OPENING : DOOR_STATE_CLOSING;
                     trigger = true;
                     break;
             }
 
             if (trigger) {
-                transition_tick = xTaskGetTickCount();
+                door_state_t next = next_state_after_trigger(state);
+                state = next;
+
+                /* Start travel timer only for active transitions */
+                if (state == DOOR_STATE_OPENING || state == DOOR_STATE_CLOSING) {
+                    transition_tick = xTaskGetTickCount();
+                } else {
+                    transition_tick = 0;
+                }
+
                 relay_pulse();
             }
         }
 
-        /* ── 2. Update state from sensors ────────────────────────────── */
+        /* ── 2. Update state from magnetic switches ──────────────────── */
         door_state_t sensor = sensors_read();
         if (sensor == DOOR_STATE_OPEN || sensor == DOOR_STATE_CLOSED) {
             if (state != sensor) {
@@ -130,7 +163,7 @@ void door_control_task(void *pvParameters)
             transition_tick = 0;
         }
 
-        /* ── 3. Travel timeout guard ─────────────────────────────────── */
+        /* ── 3. Travel timeout (OPENING / CLOSING only) ──────────────── */
         if (transition_tick != 0 &&
             (state == DOOR_STATE_OPENING || state == DOOR_STATE_CLOSING)) {
             TickType_t elapsed = xTaskGetTickCount() - transition_tick;
@@ -141,7 +174,7 @@ void door_control_task(void *pvParameters)
             }
         }
 
-        /* ── 4. Publish state changes ────────────────────────────────── */
+        /* ── 4. Publish on state change ──────────────────────────────── */
         if (state != last_published) {
             ESP_LOGI(TAG, "State: %s → %s",
                      door_state_to_str(last_published), door_state_to_str(state));

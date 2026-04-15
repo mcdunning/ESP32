@@ -22,11 +22,13 @@ static volatile door_state_t s_state = DOOR_STATE_UNKNOWN;
 /* ── Color table ─────────────────────────────────────────────────────── */
 
 static const rgb_t STATE_COLORS[] = {
-    [DOOR_STATE_UNKNOWN] = {255, 80,  0},   /* amber  — blink */
-    [DOOR_STATE_OPEN]    = {  0, 255, 0},   /* green  — solid */
-    [DOOR_STATE_CLOSED]  = {255,   0, 0},   /* red    — solid */
-    [DOOR_STATE_OPENING] = {  0, 255, 0},   /* green  — blink */
-    [DOOR_STATE_CLOSING] = {255,   0, 0},   /* red    — blink */
+    [DOOR_STATE_UNKNOWN]         = {255, 80,  0},  /* amber  — blink */
+    [DOOR_STATE_OPEN]            = {  0, 255, 0},  /* green  — solid */
+    [DOOR_STATE_CLOSED]          = {255,   0, 0},  /* red    — solid */
+    [DOOR_STATE_OPENING]         = {  0, 255, 0},  /* green  — blink */
+    [DOOR_STATE_CLOSING]         = {255,   0, 0},  /* red    — blink */
+    [DOOR_STATE_STOPPED_OPENING] = {255, 80,  0},  /* amber  — solid */
+    [DOOR_STATE_STOPPED_CLOSING] = {255, 80,  0},  /* amber  — solid */
 };
 
 static bool state_should_blink(door_state_t s)

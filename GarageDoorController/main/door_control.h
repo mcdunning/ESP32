@@ -9,6 +9,8 @@ typedef enum {
     DOOR_STATE_CLOSED,
     DOOR_STATE_OPENING,
     DOOR_STATE_CLOSING,
+    DOOR_STATE_STOPPED_OPENING,  /* mid-travel stop while opening */
+    DOOR_STATE_STOPPED_CLOSING,  /* mid-travel stop while closing */
 } door_state_t;
 
 typedef enum {
