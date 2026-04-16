@@ -190,6 +190,72 @@ idf.py -p COM<N> flash monitor
 
 On first boot the LED will blink amber (unknown state) until a magnetic switch is triggered. Check the serial monitor for startup logs and confirm MQTT messages appear on your broker.
 
+## Testing
+
+Unit tests cover the door state machine (`door_fsm`) and run on the host machine — no ESP32 required. Tests use the [Unity](https://github.com/ThrowTheSwitch/Unity) framework, sourced from the ESP-IDF installation.
+
+### Prerequisites
+
+A C compiler and CMake must be available in your terminal. Verify with:
+
+```powershell
+cmake --version
+gcc --version
+```
+
+If using PowerShell and the commands are not found, open the ESP-IDF terminal — it includes both.
+
+### Build and run
+
+**PowerShell:**
+
+```powershell
+cd C:\Workspace\ESP32\GarageDoorController\tests
+cmake -B build -G "MinGW Makefiles"
+cmake --build build
+build\test_door_fsm.exe
+```
+
+**CMD:**
+
+```cmd
+cd C:\Workspace\ESP32\GarageDoorController\tests
+cmake -B build -G "MinGW Makefiles"
+cmake --build build
+build\test_door_fsm.exe
+```
+
+> If `MinGW Makefiles` is unavailable, substitute `-G Ninja` (works in the ESP-IDF terminal).
+
+### Rebuild after changes
+
+**PowerShell:**
+```powershell
+Remove-Item -Recurse -Force build
+cmake -B build -G "MinGW Makefiles"
+cmake --build build
+build\test_door_fsm.exe
+```
+
+**CMD:**
+```cmd
+rmdir /s /q build
+cmake -B build -G "MinGW Makefiles"
+cmake --build build
+build\test_door_fsm.exe
+```
+
+### Expected output
+
+```
+test_door_fsm.c:11:test_trigger_from_closed_goes_to_opening:PASS
+test_door_fsm.c:16:test_trigger_from_opening_goes_to_stopped_opening:PASS
+...
+-----------------------
+25 Tests 0 Failures 0 Ignored
+OK
+```
+
 ## Project Structure
 
 ```
