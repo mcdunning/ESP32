@@ -21,6 +21,7 @@ ESP32 firmware that controls a garage door opener via a relay, monitors door pos
 | LED — Red | 21 | LEDC PWM channel 0 |
 | LED — Green | 22 | LEDC PWM channel 1 |
 | LED — Blue | 23 | LEDC PWM channel 2 |
+| Manual trigger button | — | 3.3 V → 1 kΩ → button → PN2222 base (hardware only, no GPIO) |
 
 ### ESP32 DevKit Pinout
 
@@ -73,7 +74,8 @@ Pins used by this project are marked. GPIO 6–11 are reserved for internal SPI 
   ┌── Door Trigger ──────────────────────────────────────────────────────┐   │
   │                                                                      │   │
   │                          PN2222                                      │   │
-  │  GPIO 4 ──┤1 kΩ├──────── Base     ◄── trigger pulse                 │   │
+  │  GPIO 4 ──┤1 kΩ├──────┬─ Base     ◄── trigger pulse                 │   │
+  │  3V3 ──┤1 kΩ├──[BTN]──┘  (button in parallel with ESP32 output)     │   │
   │                          Emitter ─────────────────────────────────── ┼───┤
   │                          Collector ──┐                               │   │
   │                                     ├── Opener wall button terminals │   │
@@ -99,6 +101,7 @@ Pins used by this project are marked. GPIO 6–11 are reserved for internal SPI 
 ### Wiring Notes
 
 - The PN2222 collector/emitter is triggered by a 500 ms pulse on GPIO 4 — wire the collector/emitter in parallel with the existing wall button terminals
+- The manual trigger button connects 3.3 V through a 1 kΩ resistor to the PN2222 base, in parallel with the GPIO 4 driver circuit — pressing it fires the transistor directly without involving the ESP32
 - Magnetic switches are wired between the sensor GPIO and GND; internal pull-ups are enabled in firmware
 - RGB LED common pin connects to GND; each colour pin connects through a resistor (~100 Ω) to its GPIO
 
