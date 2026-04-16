@@ -15,9 +15,9 @@ ESP32 firmware that controls a garage door opener via a relay, monitors door pos
 
 | Signal | GPIO | Notes |
 |---|---|---|
-| PN2222 base | 8 | Output, active-HIGH pulse |
-| Open sensor | 7 | Input, active-LOW (mag switch to GND) |
-| Closed sensor | 6 | Input, active-LOW (mag switch to GND) |
+| PN2222 base | 4 | Output, active-HIGH pulse |
+| Open sensor | 5 | Input, active-LOW (mag switch to GND) |
+| Closed sensor | 13 | Input, active-LOW (mag switch to GND) |
 | LED — Red | 21 | LEDC PWM channel 0 |
 | LED — Green | 22 | LEDC PWM channel 1 |
 | LED — Blue | 23 | LEDC PWM channel 2 |
@@ -28,9 +28,9 @@ ESP32 firmware that controls a garage door opener via a relay, monitors door pos
                         ┌───────────────────────┐
                         │         ESP32         │
                         │                       │
-               GPIO  8 ─┤                       │
-               GPIO  6 ─┤                       │
-               GPIO  7 ─┤                       │
+               GPIO  4 ─┤                       │
+               GPIO  5 ─┤                       │
+               GPIO 13 ─┤                       │
                GPIO 21 ─┤                       ├─ 3V3
                GPIO 22 ─┤                       │
                GPIO 23 ─┤                       ├─ GND ──────────────────────┐
@@ -39,7 +39,7 @@ ESP32 firmware that controls a garage door opener via a relay, monitors door pos
   ┌── Door Trigger ──────────────────────────────────────────────────────┐   │
   │                                                                      │   │
   │                          PN2222                                      │   │
-  │  GPIO 8 ──┤1 kΩ├──────── Base     ◄── trigger pulse                 │   │
+  │  GPIO 4 ──┤1 kΩ├──────── Base     ◄── trigger pulse                 │   │
   │                          Emitter ─────────────────────────────────── ┼───┤
   │                          Collector ──┐                               │   │
   │                                     ├── Opener wall button terminals │   │
@@ -48,8 +48,8 @@ ESP32 firmware that controls a garage door opener via a relay, monitors door pos
                                                                              │
   ┌── Position Sensors ──────────────────────────────────────────────────┐   │
   │                                                                      │   │
-  │  GPIO 6 ──────────────── [Mag Switch — CLOSED] ─────────────────────┼───┤
-  │  GPIO 7 ──────────────── [Mag Switch — OPEN  ] ─────────────────────┼───┤
+  │  GPIO 13 ─────────────── [Mag Switch — CLOSED] ─────────────────────┼───┤
+  │  GPIO  5 ─────────────── [Mag Switch — OPEN  ] ─────────────────────┼───┤
   │                           (active-LOW, internal pull-up enabled)     │   │
   └──────────────────────────────────────────────────────────────────────┘   │
                                                                              │
@@ -64,7 +64,7 @@ ESP32 firmware that controls a garage door opener via a relay, monitors door pos
 
 ### Wiring Notes
 
-- The PN2222 collector/emitter is triggered by a 500 ms pulse on GPIO 8 — wire the collector/emitter in parallel with the existing wall button terminals
+- The PN2222 collector/emitter is triggered by a 500 ms pulse on GPIO 4 — wire the collector/emitter in parallel with the existing wall button terminals
 - Magnetic switches are wired between the sensor GPIO and GND; internal pull-ups are enabled in firmware
 - RGB LED common pin connects to GND; each colour pin connects through a resistor (~100 Ω) to its GPIO
 

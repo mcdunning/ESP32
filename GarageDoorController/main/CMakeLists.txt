@@ -3,6 +3,7 @@ idf_component_register(
         "main.c"
         "wifi_manager.c"
         "mqtt_manager.c"
+        "door_fsm.c"
         "door_control.c"
         "led_indicator.c"
     INCLUDE_DIRS "."

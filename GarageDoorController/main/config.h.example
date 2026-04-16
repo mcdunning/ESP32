@@ -20,9 +20,9 @@
 #define MQTT_TOPIC_CMD          "garage/door/command"
 
 /* ── Hardware ──────────────────────────────────────────────────────────── */
-#define DOOR_RELAY_PIN          GPIO_NUM_8   /* NPN/relay control output          */
-#define DOOR_OPEN_SENSOR_PIN    GPIO_NUM_7   /* Mag switch, active-LOW when open   */
-#define DOOR_CLOSED_SENSOR_PIN  GPIO_NUM_6   /* Mag switch, active-LOW when closed */
+#define DOOR_RELAY_PIN          GPIO_NUM_4   /* NPN/relay control output          */
+#define DOOR_OPEN_SENSOR_PIN    GPIO_NUM_5   /* Mag switch, active-LOW when open   */
+#define DOOR_CLOSED_SENSOR_PIN  GPIO_NUM_13  /* Mag switch, active-LOW when closed */
 
 /* ── RGB LED (common cathode) ──────────────────────────────────────────── */
 #define LED_RED_PIN             GPIO_NUM_21
