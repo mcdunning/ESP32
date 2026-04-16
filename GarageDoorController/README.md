@@ -22,6 +22,40 @@ ESP32 firmware that controls a garage door opener via a relay, monitors door pos
 | LED — Green | 22 | LEDC PWM channel 1 |
 | LED — Blue | 23 | LEDC PWM channel 2 |
 
+### ESP32 DevKit Pinout
+
+Pins used by this project are marked. GPIO 6–11 are reserved for internal SPI flash and must not be used.
+
+```
+                        ┌──────────┬──────────┐
+                   3V3  │  1    38 │  GND
+                   GND  │  2    37 │  GPIO23  ◄── LED Blue
+          (boot) GPIO15 │  3    36 │  GPIO22  ◄── LED Green
+          (boot)  GPIO2 │  4    35 │  GPIO21  ◄── LED Red
+          (boot)  GPIO0 │  5    34 │  GPIO19
+                  GPIO4 │  6    33 │  GPIO18  ◄── (available)
+                 GPIO16 │  7    32 │  GPIO5   ◄── Open sensor
+                 GPIO17 │  8    31 │  GPIO17
+                        │  9    30 │  GPIO16
+                        │ 10    29 │  GPIO4   ◄── Relay trigger
+           UART0 GPIO1  │ 11    28 │  GND
+           UART0 GPIO3  │ 12    27 │  GPIO12  (boot, avoid)
+                 GPIO22 │ 13    26 │  GPIO14
+                 GPIO21 │ 14    25 │  GPIO27
+                   GND  │ 15    24 │  GPIO26
+                   VIN  │ 16    23 │  GPIO25
+                GPIO13  │ 17    22 │  GPIO33  (input only)
+                GPIO12  │ 18    21 │  GPIO32  (input only)
+                GPIO14  │ 19    20 │  GPIO35  (input only)
+                GPIO27  │ 20    19 │  GPIO34  (input only)
+                        └──────────┘
+                        GPIO13 ◄── Closed sensor
+```
+
+> **Reserved / avoid:** GPIO 6, 7, 8, 9, 10, 11 — connected to internal SPI flash.
+> **Input only:** GPIO 34, 35, 36 (VP), 39 (VN) — no internal pull-up/down, output not possible.
+> **Boot strapping:** GPIO 0, 2, 12, 15 — safe for GPIO use after boot, but keep in mind their boot-time state.
+
 ### Wiring Diagram
 
 ```
