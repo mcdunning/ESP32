@@ -146,6 +146,20 @@ mqtt:
       device_class: garage
 ```
 
+### Hubitat Driver Interface
+
+When building a Hubitat driver for this device, use the following MQTT contract:
+
+| Direction | Topic | Payloads |
+|---|---|---|
+| Subscribe (receive state) | `garage/door/state` | `open` / `closed` / `opening` / `closing` / `stopped_opening` / `stopped_closing` / `unknown` |
+| Subscribe (availability) | `garage/door/availability` | `online` / `offline` |
+| Publish (send command) | `garage/door/command` | `OPEN` / `CLOSE` / `TOGGLE` |
+
+- State and availability messages are published with **retain = true** — the driver will receive the last known state immediately on connect
+- The device publishes `offline` as a Last Will Testament when the broker connection drops
+- Commands are case-insensitive (`open`, `OPEN`, and `Open` all work)
+
 ## Setup
 
 ### 1. Configure credentials
